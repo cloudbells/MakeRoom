@@ -1,0 +1,11 @@
+## Interface: 20504
+## Title: SellPriority
+## Notes: 
+## Author: cloudbells
+## Version: 1.0.0
+## SavedVariables: 
+## SavedVariablesPerCharacter: 
+
+Util.lua
+Events.lua
+Init.lua
