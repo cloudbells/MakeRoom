@@ -4,11 +4,17 @@
 ## Author: cloudbells
 ## Version: 1.0.0
 ## SavedVariables: 
-## SavedVariablesPerCharacter: 
+## SavedVariablesPerCharacter: SPRIOOptions
 
+# Libs.
+Libs\LibStub.lua
+Libs\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0.lua
+Libs\CloudUI-1.0\CloudUI-1.0.xml
+
+# Core files.
 Util.lua
 Interface/DeleteButton.lua
 Events.lua
 Init.lua
-Libs\LibStub.lua
-Libs\CloudUI-1.0\CloudUI-1.0.xml
