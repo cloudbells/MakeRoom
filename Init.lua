@@ -2,13 +2,28 @@ local ADDON_NAME, ns = ...
 
 
 -- TODO:
-    -- add blacklist
     -- add a scroll? add a frame to the right of the highlighted frame and have the highlighted frame be the second most cheap item among the current 4
 
 
 -- Variables.
 local eventFrame
 local minimapButton = LibStub("LibDBIcon-1.0")
+
+-- Adds the given item to the blacklist.
+function ns:AddToBlacklist(itemID)
+    SPRIOOptions.blacklist[itemID] = true
+    local _, itemLink = GetItemInfo(itemID)
+    print("|cFFFFFF00SellPriority|r: Added " .. itemLink .. " to the blacklist.")
+    ns:ScanBags()
+end
+
+-- Removes the given item from the blacklist.
+function ns:RemoveFromBlacklist(itemID)
+    SPRIOOptions.blacklist[itemID] = nil
+    local _, itemLink = GetItemInfo(itemID)
+    print("|cFFFFFF00SellPriority|r: Removed " .. itemLink .. " from the blacklist.")
+    ns:ScanBags()
+end
 
 -- Shows or hides the frame.
 local function ToggleFrame()
@@ -27,7 +42,7 @@ local function ToggleMinimapButton()
     SPRIOOptions.minimapTable.show = not SPRIOOptions.minimapTable.show
     if not SPRIOOptions.minimapTable.show then
         minimapButton:Hide("SellPriority")
-        print("|cFFFFFF00SellPriority:|r Minimap button hidden. Type /SPRIO minimap to show it again.")
+        print("|cFFFFFF00SellPriority|r: Minimap button hidden. Type /SPRIO minimap to show it again.")
     else
         minimapButton:Show("SellPriority")
     end
@@ -39,7 +54,7 @@ local function InitMinimapButton()
     local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("SellPriority", {
         type = "data source",
         text = "SellPriority",
-        icon = "Interface/Addons/SellPriority/Media/FrostPresence", -- TEMP
+        icon = "Interface/Addons/SellPriority/Media/FrostPresence",
         OnClick = function(self, button)
             if button == "LeftButton" then
                 ToggleFrame()
@@ -66,8 +81,27 @@ local function InitSlash()
     SLASH_SPRIO1 = "/SPRIO"
     SLASH_SPRIO2 = "/SellPriority"
     function SlashCmdList.SPRIO(text)
-        if text == "minimap" then
+        if text == "help" then
+            print("|cFFFFFF00SellPriority|r help: \n/sprio minimap - shows or hides the minimap\n/sprio blacklist add [itemlink] - adds the given itemlink to the blacklist\n" ..
+                    "/sprio blacklist remove [itemlink] - removes the given item from the blacklist\n/sprio blacklist all - lists all the blacklist items\n" ..
+                    "/sprio blacklist purge - removes all items from the blacklist")
+        elseif text == "minimap" then
             ToggleMinimapButton()
+        elseif text:find("blacklist add") then
+            ns:AddToBlacklist(ns:ParseIDFromLink(text:match("blacklist add (.+)")))
+        elseif text:find("blacklist remove") then
+            ns:RemoveFromBlacklist(ns:ParseIDFromLink(text:match("blacklist remove (.+)")))
+        elseif text == "blacklist all" then
+            local str = ""
+            for itemID in pairs(SPRIOOptions.blacklist) do
+                local _, itemLink = GetItemInfo(itemID)
+                str = str .. "\n* " .. itemLink
+            end
+            print("|cFFFFFF00SellPriority|r: all blacklist items:" .. str)
+        elseif text == "blacklist purge" then
+            SPRIOOptions.blacklist = {}
+            ns:ScanBags()
+            print("|cFFFFFF00SellPriority|r: removed all items from the blacklist")
         else
             ToggleFrame()
         end
@@ -87,11 +121,13 @@ local function LoadVariables()
     SPRIOOptions.isHidden = SPRIOOptions.isHidden or false
     SPRIOOptions.minimapTable = SPRIOOptions.minimapTable or {}
     SPRIOOptions.minimapTable.show = SPRIOOptions.minimapTable.show or true
+    SPRIOOptions.blacklist = SPRIOOptions.blacklist or {}
 end
 
 -- Called when most game data is available.
 function ns:OnPlayerEnteringWorld()
     eventFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+    ns:ScanBags()
 end
 
 -- Called on ADDON_LOADED.

@@ -3,12 +3,13 @@ local _, ns = ...
 local CUI = LibStub("CloudUI-1.0")
 local GetContainerNumSlots = GetContainerNumSlots
 local GetContainerItemInfo = GetContainerItemInfo
+local GetItemInfo = GetItemInfo
 local buttons = {}
 local items = {}
 local clickedButton = 0
 
 -- Scans the given bag for the cheapest item. If bag is given, only scans that bag.
-local function ScanBags(bag)
+function ns:ScanBags(bag)
     items = {
         [1] = {
             value = 999999999
@@ -24,7 +25,7 @@ local function ScanBags(bag)
         for bag = bag and bag or BACKPACK_CONTAINER, bag and bag or NUM_BAG_SLOTS do
             for slot = 1, GetContainerNumSlots(bag) do
                 local texture, count, _, quality, _, _, itemLink, _, _, itemID = GetContainerItemInfo(bag, slot)
-                if itemID then
+                if itemID and SPRIOOptions and not SPRIOOptions.blacklist[itemID] then
                     local itemName, _, _, _, _, _, _, _, _, _, value = GetItemInfo(itemID)
                     if value and value > 0 then
                         value = value * count
@@ -32,6 +33,7 @@ local function ScanBags(bag)
                             items[1] = {
                                 value = value,
                                 itemName = itemName,
+                                itemID = itemID,
                                 texture = texture,
                                 count = count,
                                 quality = quality,
@@ -43,6 +45,7 @@ local function ScanBags(bag)
                             items[2] = {
                                 value = value,
                                 itemName = itemName,
+                                itemID = itemID,
                                 texture = texture,
                                 count = count,
                                 quality = quality,
@@ -54,6 +57,7 @@ local function ScanBags(bag)
                             items[3] = {
                                 value = value,
                                 itemName = itemName,
+                                itemID = itemID,
                                 texture = texture,
                                 count = count,
                                 quality = quality,
@@ -92,10 +96,15 @@ local function ScanBags(bag)
     end
 end
 
-
 -- Called when the button is clicked.
-local function DeleteButton_OnClick(self)
-    if self:GetLink() then
+local function DeleteButton_OnClick(self, button)
+    if button == "RightButton" then
+        if not SPRIOOptions.blacklist[items[self.id].itemID] then
+            ns:AddToBlacklist(items[self.id].itemID)
+        else
+            ns:RemoveFromBlacklist(items[self.id].itemID)
+        end
+    elseif self:GetLink() then
         clickedButton = self.id
         StaticPopupDialogs["SPRIO_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
                 .. " (" .. GetCoinTextureString(items[self.id].value) .. ")?"
@@ -117,7 +126,7 @@ end
 -- Called on BAG_UPDATE.
 function ns:OnBagUpdate(bag)
     if bag >= 0 then
-        ScanBags(bag)
+        ns:ScanBags(bag)
     end
 end
 
@@ -139,6 +148,7 @@ function ns:InitDeleteButton()
     -- Create buttons.
     for i = 1, 3 do
         buttons[i] = CUI:CreateLinkButton(ns.deleteButtonParent, "SellPriorityButton" .. i, {DeleteButton_OnClick})
+        buttons[i]:RegisterForClicks("LeftButtonUp", "RightButtonUp")
         buttons[i]:SetPoint("CENTER")
         buttons[i].priceFontString = buttons[i]:CreateFontString(nil, "OVERLAY", CUI:GetFontNormal():GetName())
         buttons[i].priceFontString:SetPoint("BOTTOM", 0, -25)
@@ -163,5 +173,5 @@ function ns:InitDeleteButton()
             DeleteCursorItem()
         end
     }
-    ScanBags()
+    ns:ScanBags()
 end
