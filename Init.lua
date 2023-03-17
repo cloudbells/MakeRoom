@@ -78,7 +78,7 @@ end
 -- Loads all saved variables.
 local function LoadVariables()
     SPRIOOptions = SPRIOOptions or {}
-    SPRIOOptions.isHidden = SPRIOOptions.isHidden or true
+    SPRIOOptions.isHidden = SPRIOOptions.isHidden or false
     SPRIOOptions.minimapTable = SPRIOOptions.minimapTable or {}
     SPRIOOptions.minimapTable.show = SPRIOOptions.minimapTable.show or true
 end
