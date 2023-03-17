@@ -1,10 +1,12 @@
 ## Interface: 30400
-## Title: MakeRoom
+## Title: MakeRoomClassic
 ## Notes: Easily delete the cheapest items in your inventory
 ## Author: cloudbells
-## Version: 1.0.0
+## Version: @project-version@
 ## SavedVariables: 
-## SavedVariablesPerCharacter: MROptions
+## SavedVariablesPerCharacter: MRCOptions
+## X-Curse-Project-ID: 838806
+## X-WoWI-ID: 26560
 
 # Libs.
 Libs\LibStub.lua

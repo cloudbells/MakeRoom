@@ -1,4 +1,4 @@
-# MakeRoom
+# MakeRoomClassic
 
 Conveniently displays the cheapest items in your inventory in WoW: Classic.
 

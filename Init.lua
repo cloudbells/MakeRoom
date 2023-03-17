@@ -1,6 +1,5 @@
 local ADDON_NAME, ns = ...
 
-
 -- TODO:
     -- add a scroll? add a frame to the right of the highlighted frame and have the highlighted frame be the second most cheap item among the current 4
 
@@ -10,50 +9,50 @@ local minimapButton = LibStub("LibDBIcon-1.0")
 
 -- Adds the given item to the blacklist.
 function ns:AddToBlacklist(itemID)
-    MROptions.blacklist[itemID] = true
+    MRCOptions.blacklist[itemID] = true
     local _, itemLink = GetItemInfo(itemID)
-    print("|cFFFFFF00MakeRoom|r: Added " .. itemLink .. " to the blacklist.")
+    print("|cFFFFFF00MakeRoomClassic|r: Added " .. itemLink .. " to the blacklist.")
     ns:ScanBags()
 end
 
 -- Removes the given item from the blacklist.
 function ns:RemoveFromBlacklist(itemID)
-    MROptions.blacklist[itemID] = nil
+    MRCOptions.blacklist[itemID] = nil
     local _, itemLink = GetItemInfo(itemID)
-    print("|cFFFFFF00MakeRoom|r: Removed " .. itemLink .. " from the blacklist.")
+    print("|cFFFFFF00MakeRoomClassic|r: Removed " .. itemLink .. " from the blacklist.")
     ns:ScanBags()
 end
 
 -- Shows or hides the frame.
 local function ToggleFrame()
-    if MROptions.isHidden then
+    if MRCOptions.isHidden then
         ns.deleteButtonParent:Show()
         PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
     else
         ns.deleteButtonParent:Hide()
         PlaySound(SOUNDKIT.IG_MAINMENU_CLOSE)
     end
-    MROptions.isHidden = not MROptions.isHidden
+    MRCOptions.isHidden = not MRCOptions.isHidden
 end
 
 -- Shows or hides the minimap button.
 local function ToggleMinimapButton()
-    MROptions.minimapTable.show = not MROptions.minimapTable.show
-    if not MROptions.minimapTable.show then
-        minimapButton:Hide("MakeRoom")
-        print("|cFFFFFF00MakeRoom|r: Minimap button hidden. Type /MR minimap to show it again.")
+    MRCOptions.minimapTable.show = not MRCOptions.minimapTable.show
+    if not MRCOptions.minimapTable.show then
+        minimapButton:Hide("MakeRoomClassic")
+        print("|cFFFFFF00MakeRoomClassic|r: Minimap button hidden. Type /MRC minimap to show it again.")
     else
-        minimapButton:Show("MakeRoom")
+        minimapButton:Show("MakeRoomClassic")
     end
 end
 
 -- Initializes the minimap button.
 local function InitMinimapButton()
     -- Register for eventual data brokers.
-    local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("MakeRoom", {
+    local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("MakeRoomClassic", {
         type = "data source",
-        text = "MakeRoom",
-        icon = "Interface/Addons/MakeRoom/Media/FrostPresence",
+        text = "MakeRoomClassic",
+        icon = "Interface/Addons/MakeRoomClassic/Media/FrostPresence",
         OnClick = function(self, button)
             if button == "LeftButton" then
                 ToggleFrame()
@@ -63,7 +62,7 @@ local function InitMinimapButton()
         end,
         OnEnter = function(self)
             GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-            GameTooltip:AddLine("|cFFFFFFFFMakeRoom|r")
+            GameTooltip:AddLine("|cFFFFFFFFMakeRoomClassic|r")
             GameTooltip:AddLine("Click to toggle the main frame. Right click to hide this minimap button.") -- temp
             GameTooltip:Show()
         end,
@@ -72,18 +71,19 @@ local function InitMinimapButton()
         end
     })
     -- Create minimap icon.
-    minimapButton:Register("MakeRoom", LDB, MROptions.minimapTable)
+    minimapButton:Register("MakeRoomClassic", LDB, MRCOptions.minimapTable)
 end
 
 -- Initializes slash commands.
 local function InitSlash()
-    SLASH_MAKEROOM1 = "/MR"
-    SLASH_MAKEROOM2 = "/MakeRoom"
-    function SlashCmdList.MAKEROOM(text)
+    SLASH_MRC1 = "/MRC"
+    SLASH_MRC2 = "/MakeRoomClassic"
+    function SlashCmdList.MRC(text)
         if text == "help" then
-            print("|cFFFFFF00MakeRoom|r help: \n/mr minimap - shows or hides the minimap\n/mr blacklist add [itemlink] - adds the given itemlink to the blacklist\n" ..
-                    "/mr blacklist remove [itemlink] - removes the given item from the blacklist\n/mr blacklist all - lists all the blacklist items\n" ..
-                    "/mr blacklist purge - removes all items from the blacklist")
+            print("|cFFFFFF00MakeRoomClassic|r help: \nRight click an item to add it to the blacklist.\nLeft click an item to delete it.\n" ..
+                    "/mrc minimap - shows or hides the minimap\n/mrc blacklist add [itemlink] - adds the given itemlink to the blacklist\n" ..
+                    "/mrc blacklist remove [itemlink] - removes the given item from the blacklist\n/mrc blacklist all - lists all the blacklist items\n" ..
+                    "/mrc blacklist purge - removes all items from the blacklist")
         elseif text == "minimap" then
             ToggleMinimapButton()
         elseif text:find("blacklist add") then
@@ -92,15 +92,15 @@ local function InitSlash()
             ns:RemoveFromBlacklist(ns:ParseIDFromLink(text:match("blacklist remove (.+)")))
         elseif text == "blacklist all" then
             local str = ""
-            for itemID in pairs(MROptions.blacklist) do
+            for itemID in pairs(MRCOptions.blacklist) do
                 local _, itemLink = GetItemInfo(itemID)
                 str = str .. "\n* " .. itemLink
             end
-            print("|cFFFFFF00MakeRoom|r: all blacklist items:" .. str)
+            print("|cFFFFFF00MakeRoomClassic|r: all blacklist items:" .. str)
         elseif text == "blacklist purge" then
-            MROptions.blacklist = {}
+            MRCOptions.blacklist = {}
             ns:ScanBags()
-            print("|cFFFFFF00MakeRoom|r: removed all items from the blacklist")
+            print("|cFFFFFF00MakeRoomClassic|r: removed all items from the blacklist")
         else
             ToggleFrame()
         end
@@ -116,11 +116,11 @@ end
 
 -- Loads all saved variables.
 local function LoadVariables()
-    MROptions = MROptions or {}
-    MROptions.isHidden = MROptions.isHidden or false
-    MROptions.minimapTable = MROptions.minimapTable or {}
-    MROptions.minimapTable.show = MROptions.minimapTable.show or true
-    MROptions.blacklist = MROptions.blacklist or {}
+    MRCOptions = MRCOptions or {}
+    MRCOptions.isHidden = MRCOptions.isHidden or false
+    MRCOptions.minimapTable = MRCOptions.minimapTable or {}
+    MRCOptions.minimapTable.show = MRCOptions.minimapTable.show or true
+    MRCOptions.blacklist = MRCOptions.blacklist or {}
 end
 
 -- Called when most game data is available.
@@ -136,7 +136,7 @@ function ns:OnAddonLoaded(addonName)
         LoadVariables()
         InitMinimapButton()
         InitSlash()
-        print("|cFFFFFF00MakeRoom|r loaded!")
+        print("|cFFFFFF00MakeRoomClassic|r loaded! Type /mrc help for commands and controls.")
     end
 end
 
