@@ -1,0 +1,4 @@
+package-as: MakeRoomClassic
+
+ignore:
+    - README.md
