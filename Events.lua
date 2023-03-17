@@ -22,6 +22,7 @@ function ns:RegisterAllEvents(_eventFrame)
         wowEvents = {
             ADDON_LOADED = ns.OnAddonLoaded,
             PLAYER_ENTERING_WORLD = ns.OnPlayerEnteringWorld,
+            BAG_UPDATE = ns.OnBagUpdate
         }
         for event, callback in pairs(wowEvents) do
             eventFrame:RegisterEvent(event, callback)
