@@ -25,7 +25,7 @@ function ns:ScanBags(bag)
         for bag = bag and bag or BACKPACK_CONTAINER, bag and bag or NUM_BAG_SLOTS do
             for slot = 1, GetContainerNumSlots(bag) do
                 local texture, count, _, quality, _, _, itemLink, _, _, itemID = GetContainerItemInfo(bag, slot)
-                if itemID and SPRIOOptions and not SPRIOOptions.blacklist[itemID] then
+                if itemID and MROptions and not MROptions.blacklist[itemID] then
                     local itemName, _, _, _, _, _, _, _, _, _, value = GetItemInfo(itemID)
                     if value and value > 0 then
                         value = value * count
@@ -99,16 +99,16 @@ end
 -- Called when the button is clicked.
 local function DeleteButton_OnClick(self, button)
     if button == "RightButton" then
-        if not SPRIOOptions.blacklist[items[self.id].itemID] then
+        if not MROptions.blacklist[items[self.id].itemID] then
             ns:AddToBlacklist(items[self.id].itemID)
         else
             ns:RemoveFromBlacklist(items[self.id].itemID)
         end
     elseif self:GetLink() then
         clickedButton = self.id
-        StaticPopupDialogs["SPRIO_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
+        StaticPopupDialogs["MAKEROOM_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
                 .. " (" .. GetCoinTextureString(items[self.id].value) .. ")?"
-        StaticPopup_Show("SPRIO_CONFIRM_DELETE")
+        StaticPopup_Show("MAKEROOM_CONFIRM_DELETE")
     end
 end
 
@@ -133,7 +133,7 @@ end
 -- Creates the delete button.
 function ns:InitDeleteButton()
     -- Create the parent frame.
-    ns.deleteButtonParent = CreateFrame("Frame", "SellPriorityFrame", UIParent)
+    ns.deleteButtonParent = CreateFrame("Frame", "MakeRoomFrame", UIParent)
     CUI:ApplyTemplate(ns.deleteButtonParent, CUI.templates.BackgroundFrameTemplate)
     CUI:ApplyTemplate(ns.deleteButtonParent, CUI.templates.BorderedFrameTemplate)
     ns.deleteButtonParent:SetSize(50, 50)
@@ -147,7 +147,7 @@ function ns:InitDeleteButton()
     end)
     -- Create buttons.
     for i = 1, 3 do
-        buttons[i] = CUI:CreateLinkButton(ns.deleteButtonParent, "SellPriorityButton" .. i, {DeleteButton_OnClick})
+        buttons[i] = CUI:CreateLinkButton(ns.deleteButtonParent, "MakeRoomButton" .. i, {DeleteButton_OnClick})
         buttons[i]:RegisterForClicks("LeftButtonUp", "RightButtonUp")
         buttons[i]:SetPoint("CENTER")
         buttons[i].priceFontString = buttons[i]:CreateFontString(nil, "OVERLAY", CUI:GetFontNormal():GetName())
@@ -163,7 +163,7 @@ function ns:InitDeleteButton()
     buttons[3]:SetPoint("RIGHT", buttons[2], "LEFT", -10, 0)
     buttons[3].priceFontString:SetPoint("BOTTOM", 0, -17)
     -- Init static popup.
-    StaticPopupDialogs["SPRIO_CONFIRM_DELETE"] = {
+    StaticPopupDialogs["MAKEROOM_CONFIRM_DELETE"] = {
         text = "Placeholder text",
         button1 = "Yes",
         button2 = "No",

@@ -1,10 +1,10 @@
 ## Interface: 11403
-## Title: SellPriority
-## Notes: 
+## Title: MakeRoom
+## Notes: Easily delete the cheapest items in your inventory
 ## Author: cloudbells
 ## Version: 1.0.0
 ## SavedVariables: 
-## SavedVariablesPerCharacter: SPRIOOptions
+## SavedVariablesPerCharacter: MROptions
 
 # Libs.
 Libs\LibStub.lua
