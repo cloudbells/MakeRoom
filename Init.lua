@@ -1,5 +1,11 @@
 local ADDON_NAME, ns = ...
 
+
+-- TODO:
+    -- add blacklist
+    -- add a scroll? add a frame to the right of the highlighted frame and have the highlighted frame be the second most cheap item among the current 4
+
+
 -- Variables.
 local eventFrame
 local minimapButton = LibStub("LibDBIcon-1.0")

@@ -4,25 +4,12 @@ local CUI = LibStub("CloudUI-1.0")
 local GetContainerNumSlots = GetContainerNumSlots
 local GetContainerItemInfo = GetContainerItemInfo
 local buttons = {}
-
-
-
-
-
--- BUG: why does cloak only show up if its AFTER legs + chest?
-    -- because items[1] slurps it up then is replaced by the next item thats encountered
-    -- brute-force solution: iterate bags 3 times
-    -- better solution?
-
-
-
-
-
-
+local items = {}
+local clickedButton = 0
 
 -- Scans the given bag for the cheapest item. If bag is given, only scans that bag.
 local function ScanBags(bag)
-    local items = {
+    items = {
         [1] = {
             value = 999999999
         },
@@ -80,10 +67,6 @@ local function ScanBags(bag)
             end
         end
     end
-    if items[1].texture then
-        StaticPopupDialogs["SPRIO_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[1].itemLink .. (items[1].count > 1 and "x" .. items[1].count or "")
-                    .. " (" .. GetCoinTextureString(items[1].value) .. ")?"
-    end
     for i = 1, 3 do
         if items[i].texture then
             local color = ITEM_QUALITY_COLORS[items[i].quality]
@@ -113,6 +96,9 @@ end
 -- Called when the button is clicked.
 local function DeleteButton_OnClick(self)
     if self:GetLink() then
+        clickedButton = self.id
+        StaticPopupDialogs["SPRIO_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
+                .. " (" .. GetCoinTextureString(items[self.id].value) .. ")?"
         StaticPopup_Show("SPRIO_CONFIRM_DELETE")
     end
 end
@@ -152,7 +138,7 @@ function ns:InitDeleteButton()
     end)
     -- Create buttons.
     for i = 1, 3 do
-        buttons[i] = CUI:CreateLinkButton(ns.deleteButtonParent, "SellPriorityButton" .. i)
+        buttons[i] = CUI:CreateLinkButton(ns.deleteButtonParent, "SellPriorityButton" .. i, {DeleteButton_OnClick})
         buttons[i]:SetPoint("CENTER")
         buttons[i].priceFontString = buttons[i]:CreateFontString(nil, "OVERLAY", CUI:GetFontNormal():GetName())
         buttons[i].priceFontString:SetPoint("BOTTOM", 0, -25)
@@ -160,8 +146,8 @@ function ns:InitDeleteButton()
         buttons[i].countFontString:SetPoint("BOTTOMRIGHT")
         buttons[i].SetItemLocation = DeleteButton_SetItemLocation
         buttons[i].GetItemLocation = DeleteButton_GetItemLocation
+        buttons[i].id = i
     end
-    buttons[1]:RegisterCallback(DeleteButton_OnClick)
     buttons[2]:SetPoint("RIGHT", ns.deleteButtonParent, "LEFT", -10, 0)
     buttons[2].priceFontString:SetPoint("BOTTOM", 0, -17)
     buttons[3]:SetPoint("RIGHT", buttons[2], "LEFT", -10, 0)
@@ -173,7 +159,7 @@ function ns:InitDeleteButton()
         button2 = "No",
         timeout = 0,
         OnAccept = function()
-            PickupContainerItem(deleteButton:GetItemLocation())
+            PickupContainerItem(buttons[clickedButton]:GetItemLocation())
             DeleteCursorItem()
         end
     }
