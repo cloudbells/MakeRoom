@@ -7,6 +7,17 @@ local GetItemInfo = GetItemInfo
 local buttons = {}
 local items = {}
 local clickedButton = 0
+local isAtMerchant = false
+
+-- Called when the player speaks with a merchant.
+function ns:OnMerchantShow()
+    isAtMerchant = true
+end
+
+-- Called when the player leaves a merchant.
+function ns.OnMerchantClosed()
+    isAtMerchant = false
+end
 
 -- Scans the given bag for the cheapest item.
 function ns:ScanBags()
@@ -107,9 +118,13 @@ local function DeleteButton_OnClick(self, button)
         end
     elseif self:GetLink() then
         clickedButton = self.id
-        StaticPopupDialogs["MAKEROOMCLASSIC_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
-                .. " (" .. GetCoinTextureString(items[self.id].value) .. ")?"
-        StaticPopup_Show("MAKEROOMCLASSIC_CONFIRM_DELETE")
+        if isAtMerchant then
+            UseContainerItem(self.bag, self.slot)
+        else
+            StaticPopupDialogs["MAKEROOMCLASSIC_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
+                    .. " (" .. GetCoinTextureString(items[self.id].value) .. ")?"
+            StaticPopup_Show("MAKEROOMCLASSIC_CONFIRM_DELETE")
+        end
     end
 end
 
