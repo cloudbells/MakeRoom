@@ -8,8 +8,8 @@ local buttons = {}
 local items = {}
 local clickedButton = 0
 
--- Scans the given bag for the cheapest item. If bag is given, only scans that bag.
-function ns:ScanBags(bag)
+-- Scans the given bag for the cheapest item.
+function ns:ScanBags()
     items = {
         [1] = {
             value = 999999999
@@ -22,7 +22,7 @@ function ns:ScanBags(bag)
         }
     }
     for i = 1, 3 do
-        for bag = bag and bag or BACKPACK_CONTAINER, bag and bag or NUM_BAG_SLOTS do
+        for bag = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
             for slot = 1, GetContainerNumSlots(bag) do
                 local texture, count, _, quality, _, _, itemLink, _, _, itemID = GetContainerItemInfo(bag, slot)
                 if itemID and MRCOptions and not MRCOptions.blacklist[itemID] then
@@ -41,7 +41,7 @@ function ns:ScanBags(bag)
                                 bag = bag,
                                 slot = slot
                             }
-                        elseif value < items[2].value and not (items[1].bag == bag and items[1].slot == slot) then
+                        elseif value < items[2].value and not (items[1].bag == bag and items[1].slot == slot) and not (items[3].bag == bag and items[3].slot == slot) then
                             items[2] = {
                                 value = value,
                                 itemName = itemName,
@@ -126,7 +126,7 @@ end
 -- Called on BAG_UPDATE.
 function ns:OnBagUpdate(bag)
     if bag >= 0 then
-        ns:ScanBags(bag)
+        ns:ScanBags()
     end
 end
 
