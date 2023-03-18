@@ -76,7 +76,8 @@ function ns:ScanBags()
             local color = ITEM_QUALITY_COLORS[items[i].quality]
             buttons[i]:Show()
             buttons[i]:Enable()
-            buttons[i].priceFontString:SetText(GetCoinTextureString(items[i].value))
+            local valueStr = items[i].value < 100 and items[i].value .. "c" or (items[i].value >= 100 and items[i].value < 10000 and items[i].value / 100 .. "s") or items[i].value / 10000 .. "g"
+            buttons[i].priceFontString:SetText(valueStr)
             buttons[i]:SetIcon(items[i].texture)
             buttons[i].countFontString:SetText(items[i].count > 1 and items[i].count)
             buttons[i]:SetBorderColor(color.r, color.g, color.b)
