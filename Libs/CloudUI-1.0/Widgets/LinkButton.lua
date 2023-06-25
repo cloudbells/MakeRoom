@@ -63,6 +63,9 @@ end
 -- Sets the link for the given frame.
 local function SetLink(self, link)
     self.link = link
+    if self == GameTooltip:GetOwner() then
+        GameTooltip:SetHyperlink(link)
+    end
 end
 
 -- Gets the link for the given frame.

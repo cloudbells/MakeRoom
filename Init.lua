@@ -25,20 +25,20 @@ end
 
 -- Shows or hides the frame.
 local function ToggleFrame()
+    MRCOptions.isHidden = not MRCOptions.isHidden
     if MRCOptions.isHidden then
-        ns.deleteButtonParent:Show()
-        PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
-    else
         ns.deleteButtonParent:Hide()
         PlaySound(SOUNDKIT.IG_MAINMENU_CLOSE)
+    else
+        ns.deleteButtonParent:Show()
+        PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
     end
-    MRCOptions.isHidden = not MRCOptions.isHidden
 end
 
 -- Shows or hides the minimap button.
 local function ToggleMinimapButton()
-    MRCOptions.minimapTable.show = not MRCOptions.minimapTable.show
-    if not MRCOptions.minimapTable.show then
+    MRCOptions.minimapTable.hide = not MRCOptions.minimapTable.hide
+    if MRCOptions.minimapTable.hide then
         minimapButton:Hide("MakeRoomClassic")
         print("|cFFFFFF00MakeRoomClassic|r: Minimap button hidden. Type /MRC minimap to show it again.")
     else
@@ -94,7 +94,9 @@ local function InitSlash()
             local str = ""
             for itemID in pairs(MRCOptions.blacklist) do
                 local _, itemLink = GetItemInfo(itemID)
-                str = str .. "\n* " .. itemLink
+                if itemLink then
+                    print("* " .. itemLink)
+                end
             end
             print("|cFFFFFF00MakeRoomClassic|r: all blacklist items:" .. str)
         elseif text == "blacklist purge" then
@@ -119,7 +121,6 @@ local function LoadVariables()
     MRCOptions = MRCOptions or {}
     MRCOptions.isHidden = MRCOptions.isHidden or false
     MRCOptions.minimapTable = MRCOptions.minimapTable or {}
-    MRCOptions.minimapTable.show = MRCOptions.minimapTable.show or true
     MRCOptions.blacklist = MRCOptions.blacklist or {}
 end
 
@@ -127,6 +128,9 @@ end
 function ns:OnPlayerEnteringWorld()
     eventFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
     ns:ScanBags()
+    if MRCOptions.isHidden then
+        ns.deleteButtonParent:Hide()
+    end
 end
 
 -- Called on ADDON_LOADED.
