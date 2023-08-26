@@ -1,8 +1,8 @@
 local _, ns = ...
 
 local CUI = LibStub("CloudUI-1.0")
-local GetContainerNumSlots = GetContainerNumSlots
-local GetContainerItemInfo = GetContainerItemInfo
+local GetContainerNumSlots = C_Container.GetContainerNumSlots
+local GetContainerItemInfo = C_Container.GetContainerItemInfo
 local GetItemInfo = GetItemInfo
 local buttons = {}
 local items = {}
@@ -35,47 +35,50 @@ function ns:ScanBags()
     for i = 1, 3 do
         for bag = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
             for slot = 1, GetContainerNumSlots(bag) do
-                local texture, count, _, quality, _, _, itemLink, _, _, itemID = GetContainerItemInfo(bag, slot)
-                if itemID and MRCOptions and not MRCOptions.blacklist[itemID] then
-                    local itemName, _, _, _, _, _, _, _, _, _, value = GetItemInfo(itemID)
-                    if value and value > 0 then
-                        value = value * count
-                        if value < items[1].value then
-                            items[1] = {
-                                value = value,
-                                itemName = itemName,
-                                itemID = itemID,
-                                texture = texture,
-                                count = count,
-                                quality = quality,
-                                itemLink = itemLink,
-                                bag = bag,
-                                slot = slot
-                            }
-                        elseif value < items[2].value and not (items[1].bag == bag and items[1].slot == slot) and not (items[3].bag == bag and items[3].slot == slot) then
-                            items[2] = {
-                                value = value,
-                                itemName = itemName,
-                                itemID = itemID,
-                                texture = texture,
-                                count = count,
-                                quality = quality,
-                                itemLink = itemLink,
-                                bag = bag,
-                                slot = slot
-                            }
-                        elseif value < items[3].value and not (items[1].bag == bag and items[1].slot == slot) and not (items[2].bag == bag and items[2].slot == slot) then
-                            items[3] = {
-                                value = value,
-                                itemName = itemName,
-                                itemID = itemID,
-                                texture = texture,
-                                count = count,
-                                quality = quality,
-                                itemLink = itemLink,
-                                bag = bag,
-                                slot = slot
-                            }
+                local itemInfo = GetContainerItemInfo(bag, slot)
+                if itemInfo then
+                    local texture, count, quality, itemLink, itemID = itemInfo.iconFileID, itemInfo.stackCount, itemInfo.quality, itemInfo.hyperlink, itemInfo.itemID
+                    if MRCOptions and not MRCOptions.blacklist[itemID] then
+                        local itemName, _, _, _, _, _, _, _, _, _, value = GetItemInfo(itemID)
+                        if value and value > 0 then
+                            value = value * count
+                            if value < items[1].value then
+                                items[1] = {
+                                    value = value,
+                                    itemName = itemName,
+                                    itemID = itemID,
+                                    texture = texture,
+                                    count = count,
+                                    quality = quality,
+                                    itemLink = itemLink,
+                                    bag = bag,
+                                    slot = slot
+                                }
+                            elseif value < items[2].value and not (items[1].bag == bag and items[1].slot == slot) and not (items[3].bag == bag and items[3].slot == slot) then
+                                items[2] = {
+                                    value = value,
+                                    itemName = itemName,
+                                    itemID = itemID,
+                                    texture = texture,
+                                    count = count,
+                                    quality = quality,
+                                    itemLink = itemLink,
+                                    bag = bag,
+                                    slot = slot
+                                }
+                            elseif value < items[3].value and not (items[1].bag == bag and items[1].slot == slot) and not (items[2].bag == bag and items[2].slot == slot) then
+                                items[3] = {
+                                    value = value,
+                                    itemName = itemName,
+                                    itemID = itemID,
+                                    texture = texture,
+                                    count = count,
+                                    quality = quality,
+                                    itemLink = itemLink,
+                                    bag = bag,
+                                    slot = slot
+                                }
+                            end
                         end
                     end
                 end
@@ -90,7 +93,7 @@ function ns:ScanBags()
             local valueStr = items[i].value < 100 and items[i].value .. "c" or (items[i].value >= 100 and items[i].value < 10000 and items[i].value / 100 .. "s") or items[i].value / 10000 .. "g"
             buttons[i].priceFontString:SetText(valueStr)
             buttons[i]:SetIcon(items[i].texture)
-            buttons[i].countFontString:SetText(items[i].count > 1 and items[i].count)
+            buttons[i].countFontString:SetText(items[i].count > 1 and items[i].count or "")
             buttons[i]:SetBorderColor(color.r, color.g, color.b)
             buttons[i]:SetLink(items[i].itemLink)
             buttons[i]:SetItemLocation(items[i].bag, items[i].slot)
@@ -100,9 +103,9 @@ function ns:ScanBags()
             else
                 buttons[i]:Hide()
             end
-            buttons[i].priceFontString:SetText(nil)
+            buttons[i].priceFontString:SetText("")
             buttons[i]:SetIcon(nil)
-            buttons[i].countFontString:SetText(nil)
+            buttons[i].countFontString:SetText("")
             buttons[i]:SetLink(nil)
         end
     end
@@ -119,7 +122,7 @@ local function DeleteButton_OnClick(self, button)
     elseif self:GetLink() then
         clickedButton = self.id
         if isAtMerchant then
-            UseContainerItem(self.bag, self.slot)
+            C_Container.UseContainerItem(self.bag, self.slot)
         else
             StaticPopupDialogs["MAKEROOMCLASSIC_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
                     .. " (" .. GetCoinTextureString(items[self.id].value) .. ")?"
@@ -185,7 +188,7 @@ function ns:InitDeleteButton()
         button2 = "No",
         timeout = 0,
         OnAccept = function()
-            PickupContainerItem(buttons[clickedButton]:GetItemLocation())
+            C_Container.PickupContainerItem(buttons[clickedButton]:GetItemLocation())
             DeleteCursorItem()
         end
     }
