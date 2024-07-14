@@ -3,7 +3,7 @@ local _, ns = ...
 local CUI = LibStub("CloudUI-1.0")
 local GetContainerNumSlots = C_Container.GetContainerNumSlots
 local GetContainerItemInfo = C_Container.GetContainerItemInfo
-local GetItemInfo = GetItemInfo
+local GetItemInfo = C_Item.GetItemInfo
 local buttons = {}
 local items = {}
 local clickedButton = 0
@@ -21,23 +21,14 @@ end
 
 -- Scans the given bag for the cheapest item.
 function ns:ScanBags()
-    items = {
-        [1] = {
-            value = 999999999
-        },
-        [2] = {
-            value = 999999999
-        },
-        [3] = {
-            value = 999999999
-        }
-    }
+    items = {[1] = {value = 999999999}, [2] = {value = 999999999}, [3] = {value = 999999999}}
     for i = 1, 3 do
         for bag = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
             for slot = 1, GetContainerNumSlots(bag) do
                 local itemInfo = GetContainerItemInfo(bag, slot)
                 if itemInfo then
-                    local texture, count, quality, itemLink, itemID = itemInfo.iconFileID, itemInfo.stackCount, itemInfo.quality, itemInfo.hyperlink, itemInfo.itemID
+                    local texture, count, quality, itemLink, itemID = itemInfo.iconFileID, itemInfo.stackCount, itemInfo.quality, itemInfo.hyperlink,
+                                                                      itemInfo.itemID
                     if MRCOptions and not MRCOptions.blacklist[itemID] then
                         local itemName, _, _, _, _, _, _, _, _, _, value = GetItemInfo(itemID)
                         if value and value > 0 then
@@ -54,7 +45,8 @@ function ns:ScanBags()
                                     bag = bag,
                                     slot = slot
                                 }
-                            elseif value < items[2].value and not (items[1].bag == bag and items[1].slot == slot) and not (items[3].bag == bag and items[3].slot == slot) then
+                            elseif value < items[2].value and not (items[1].bag == bag and items[1].slot == slot) and
+                                not (items[3].bag == bag and items[3].slot == slot) then
                                 items[2] = {
                                     value = value,
                                     itemName = itemName,
@@ -66,7 +58,8 @@ function ns:ScanBags()
                                     bag = bag,
                                     slot = slot
                                 }
-                            elseif value < items[3].value and not (items[1].bag == bag and items[1].slot == slot) and not (items[2].bag == bag and items[2].slot == slot) then
+                            elseif value < items[3].value and not (items[1].bag == bag and items[1].slot == slot) and
+                                not (items[2].bag == bag and items[2].slot == slot) then
                                 items[3] = {
                                     value = value,
                                     itemName = itemName,
@@ -90,7 +83,8 @@ function ns:ScanBags()
             local color = ITEM_QUALITY_COLORS[items[i].quality]
             buttons[i]:Show()
             buttons[i]:Enable()
-            local valueStr = items[i].value < 100 and items[i].value .. "c" or (items[i].value >= 100 and items[i].value < 10000 and items[i].value / 100 .. "s") or items[i].value / 10000 .. "g"
+            local valueStr = items[i].value < 100 and items[i].value .. "c" or
+                                 (items[i].value >= 100 and items[i].value < 10000 and items[i].value / 100 .. "s") or items[i].value / 10000 .. "g"
             buttons[i].priceFontString:SetText(valueStr)
             buttons[i]:SetIcon(items[i].texture)
             buttons[i].countFontString:SetText(items[i].count > 1 and items[i].count or "")
@@ -124,8 +118,9 @@ local function DeleteButton_OnClick(self, button)
         if isAtMerchant then
             C_Container.UseContainerItem(self.bag, self.slot)
         else
-            StaticPopupDialogs["MAKEROOMCLASSIC_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink .. (items[self.id].count > 1 and "x" .. items[self.id].count or "")
-                    .. " (" .. GetCoinTextureString(items[self.id].value) .. ")?"
+            StaticPopupDialogs["MAKEROOMCLASSIC_CONFIRM_DELETE"].text = "Are you sure you want to delete " .. items[self.id].itemLink ..
+                                                                            (items[self.id].count > 1 and "x" .. items[self.id].count or "") .. " (" ..
+                                                                            GetCoinTextureString(items[self.id].value) .. ")?"
             StaticPopup_Show("MAKEROOMCLASSIC_CONFIRM_DELETE")
         end
     end
@@ -139,7 +134,7 @@ end
 
 -- Gets the location of the item.
 local function DeleteButton_GetItemLocation(self)
-    return self.bag, self. slot
+    return self.bag, self.slot
 end
 
 -- Called on BAG_UPDATE.
@@ -166,7 +161,7 @@ function ns:InitDeleteButton()
     end)
     -- Create buttons.
     for i = 1, 3 do
-        buttons[i] = CUI:CreateLinkButton(ns.deleteButtonParent, "MakeRoomClassicButton" .. i, {DeleteButton_OnClick})
+        buttons[i] = CUI:CreateLinkButton(ns.deleteButtonParent, "MakeRoomClassicButton" .. i, nil, {DeleteButton_OnClick})
         buttons[i]:RegisterForClicks("LeftButtonUp", "RightButtonUp")
         buttons[i]:SetPoint("CENTER")
         buttons[i].priceFontString = buttons[i]:CreateFontString(nil, "OVERLAY", CUI:GetFontNormal():GetName())
