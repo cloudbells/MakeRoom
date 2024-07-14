@@ -1,4 +1,3 @@
 [submodule "CloudUI-1.0"]
 	path = Libs/CloudUI-1.0
 	url = https://github.com/cloudbells/CloudUI
-	branch = master
